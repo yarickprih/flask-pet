@@ -1,5 +1,4 @@
-from functools import partial
-from flask import jsonify, request
+from flask import request
 from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
 from project import db
