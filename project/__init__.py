@@ -23,6 +23,7 @@ from .user import resources as user_resources
 
 api.add_resource(user_resources.UserResource, "/user/<uuid>")
 api.add_resource(user_resources.UsersResource, "/user")
+api.add_resource(user_resources.Login, "/login")
 
 
 if __name__ == "__main__":

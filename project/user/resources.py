@@ -1,15 +1,18 @@
+import bcrypt
 from flask import request
 from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
 from project import db
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 
 from .models import User
-from .schemas import UserSchema, UserSchemaOutput
+from .schemas import UserLogin, UserSchema, UserSchemaOutput
 
 user_schema = UserSchema()
 user_schema_output = UserSchemaOutput()
 users_schema_output = UserSchemaOutput(many=True)
+user_login_schema = UserLogin()
 
 
 class UserResource(Resource):
@@ -73,3 +76,17 @@ class UsersResource(Resource):
         except IntegrityError as err:
             return {"error": str(err)}, 409
         return user_schema_output.dump(user), 201
+
+
+class Login(Resource):
+    def post(self):
+        data = request.json
+        user = User.query.filter_by(username=data["username"]).first()
+        if not user:
+            return {"error": f"Username '{data['username']}' doesn't"}, 422
+        if not bcrypt.checkpw(
+            data["password"].encode("utf-8"), user.password.encode("utf-8")
+        ):
+            return {"error": "Invalid credentials"}, 422
+
+        return {"message": "You've been authenticated successfully"}, 200

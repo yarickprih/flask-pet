@@ -17,9 +17,13 @@ class User(db.Model):
         self.email = email
         self.username = username
         self.uuid = str(uuid.uuid4())[:8]
-        self.password = bcrypt.generate_password_hash(
-            password, app.config.get("BCRYPT_LOG_ROUNDS")
-        ).decode()
+        self.password = self.set_password(password)
+
+    def set_password(self, password):
+        return bcrypt.generate_password_hash(
+            password,
+            app.config.get("BCRYPT_LOG_ROUNDS"),
+        ).decode("utf-8")
 
     def __str__(self) -> None:
         return str(
