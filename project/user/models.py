@@ -1,8 +1,9 @@
 import re
 import uuid
 
-from project import app, bcrypt, db
+from project import db
 from sqlalchemy.orm import validates
+from werkzeug.security import generate_password_hash
 
 
 class User(db.Model):
@@ -17,35 +18,15 @@ class User(db.Model):
         self.email = email
         self.username = username
         self.uuid = str(uuid.uuid4())[:8]
-        self.password = self.set_password(password)
+        self.password = generate_password_hash(password)
 
-    def set_password(self, password):
-        return bcrypt.generate_password_hash(
-            password,
-            app.config.get("BCRYPT_LOG_ROUNDS"),
-        ).decode("utf-8")
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
 
-    def __str__(self) -> None:
-        return str(
-            {
-                "id": self.id,
-                "uuid": self.uuid,
-                "username": self.username,
-                "email": self.email,
-                "password": self.password,
-            }
-        )
-
-    def __repr__(self) -> None:
-        return str(
-            {
-                "id": self.id,
-                "uuid": self.uuid,
-                "username": self.username,
-                "email": self.email,
-                "password": self.password,
-            }
-        )
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
     @validates("username")
     def validate_username(self, _, username: str) -> str:

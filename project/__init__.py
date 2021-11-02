@@ -14,7 +14,6 @@ app.register_blueprint(user_bp)
 ma = Marshmallow(app)
 api = Api(app)
 db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
 

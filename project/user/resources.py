@@ -4,7 +4,8 @@ from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
 from project import db
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.security import check_password_hash
+
 
 from .models import User
 from .schemas import UserLogin, UserSchema, UserSchemaOutput
@@ -17,25 +18,23 @@ user_login_schema = UserLogin()
 
 class UserResource(Resource):
     def get(self, uuid):
-        user = User.query.filter_by(uuid=uuid).first_or_404(
-            description=f"User with uuid '{uuid}' wasn't found"
-        )
-        return user_schema_output.dump(user), 200
+        if user := User.query.filter_by(uuid=uuid).first():
+            return user_schema_output.dump(user), 200
+        return {"error": f"User with uuid '{uuid}' wasn't found"}
 
     def put(self, uuid):
         user_data = request.json
         user_instance = User.query.filter_by(uuid=uuid).first_or_404(
             description=f"User with uuid '{uuid}' wasn't found"
         )
+        user = user_schema.load(
+            user_data,
+            session=db.session,
+            instance=user_instance,
+            partial=True,
+        )
         try:
-            user = user_schema.load(
-                user_data,
-                session=db.session,
-                instance=user_instance,
-                partial=True,
-            )
-            db.session.add(user)
-            db.session.commit()
+            user.add()
         except AssertionError as err:
             return {"error": str(err)}, 400
         except ValidationError as err:
@@ -48,27 +47,21 @@ class UserResource(Resource):
         user = User.query.filter_by(uuid=uuid).first_or_404(
             description=f"User with uuid '{uuid}' wasn't found"
         )
-        db.session.delete(user)
-        db.session.commit()
+        user.delete()
         return user_schema_output.dump(user), 204
 
 
 class UsersResource(Resource):
     def get(self):
-        users = User.query.all()
-        return (
-            {"message": "No users found"}
-            if not users
-            else users_schema_output.dump(users),
-            200,
-        )
+        if users := User.query.all():
+            return users_schema_output.dump(users), 200
+        return {"message": "No users found"}
 
     def post(self):
         user_data = request.json
+        user = User(**user_data)
         try:
-            user = User(**user_data)
-            db.session.add(user)
-            db.session.commit()
+            user.add()
         except AssertionError as err:
             return {"error": str(err)}, 400
         except ValidationError as err:
@@ -83,10 +76,7 @@ class Login(Resource):
         data = request.json
         user = User.query.filter_by(username=data["username"]).first()
         if not user:
-            return {"error": f"Username '{data['username']}' doesn't"}, 422
-        if not bcrypt.checkpw(
-            data["password"].encode("utf-8"), user.password.encode("utf-8")
-        ):
+            return {"error": f"Username '{data['username']}' doesn't exist"}, 422
+        if not check_password_hash(user.password, data["password"]):
             return {"error": "Invalid credentials"}, 422
-
         return {"message": "You've been authenticated successfully"}, 200
