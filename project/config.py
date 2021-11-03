@@ -21,3 +21,10 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
+
+
+config_map = {
+    "dev": DevelopmentConfig,
+    "test": TestingConfig,
+    "prod": ProductionConfig,
+}
