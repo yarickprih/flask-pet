@@ -7,3 +7,4 @@ Dockerfile
 migrations/
 **/__pycache__/
 .pylintrc
+**/*cache/
