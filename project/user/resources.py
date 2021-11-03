@@ -1,4 +1,3 @@
-import bcrypt
 from flask import request
 from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
@@ -6,14 +5,12 @@ from project import db
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash
 
-
 from .models import User
-from .schemas import UserLogin, UserSchema, UserSchemaOutput
+from .schemas import UserSchema, UserSchemaOutput
 
 user_schema = UserSchema()
 user_schema_output = UserSchemaOutput()
 users_schema_output = UserSchemaOutput(many=True)
-user_login_schema = UserLogin()
 
 
 class UserResource(Resource):

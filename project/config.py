@@ -1,5 +1,5 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 
@@ -10,11 +10,14 @@ class Config:
     SQLALCHEMY_DATABASE_URI = str(os.getenv("SQLALCHEMY_DATABASE_URI"))
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
+
 class ProductionConfig(Config):
     pass
 
+
 class DevelopmentConfig(Config):
     DEBUG = True
+
 
 class TestingConfig(Config):
     TESTING = True

@@ -1,6 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy.schema import auto_field
-from marshmallow import Schema, fields
+
 from .models import User
 
 
@@ -25,8 +25,3 @@ class UserSchemaOutput(SQLAlchemySchema):
 
     class Meta:
         model = User
-
-
-class UserLogin(Schema):
-    username = fields.Str()
-    password = fields.Str()
