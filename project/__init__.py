@@ -1,10 +1,10 @@
+import os
+
 from flask import Flask
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
-
-from .config import DevelopmentConfig
 
 ma = Marshmallow()
 api = Api()
@@ -14,7 +14,9 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(DevelopmentConfig)
+    app.config.from_object(
+        os.getenv("CONFIG", default="project.config.DevelopmentConfig")
+    )
     initialize_extensions(app)
     register_blueprints(app)
     return app
