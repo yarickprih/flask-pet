@@ -63,8 +63,8 @@ class UsersResource(Resource):
             return {"error": str(err)}, 400
         except ValidationError as err:
             return {"error": str(err)}, 422
-        except IntegrityError as err:
-            return {"error": str(err)}, 409
+        except IntegrityError:
+            return {"error": "User with such credentials already exists"}, 409
         return user_schema_output.dump(user), 201
 
 
